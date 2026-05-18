@@ -32,6 +32,8 @@ export default function Home() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [success, setSuccess] = useState(false);
   const [receipt, setReceipt] = useState<any | null>(null);
+  const [orders, setOrders] = useState<any[]>([]);
+  const [showHistory, setShowHistory] = useState(false);
 
   // ADD TO CART
   const addToCart = (item: any) => {
@@ -72,18 +74,19 @@ export default function Home() {
   );
 
   // CHECKOUT
-  const checkout = () => {
-    setShowConfirm(true);
-  };
+  const checkout = () => setShowConfirm(true);
 
   const confirmYes = () => {
     const orderData = {
+      id: Date.now(),
       items: cart,
       total: total,
       time: new Date().toLocaleString(),
     };
 
+    setOrders((prev) => [orderData, ...prev]);
     setReceipt(orderData);
+
     setCart([]);
     setShowConfirm(false);
     setSuccess(true);
@@ -91,17 +94,17 @@ export default function Home() {
     setTimeout(() => setSuccess(false), 2000);
   };
 
-  // ===== WELCOME SCREEN =====
+  // ===== WELCOME =====
   if (!started) {
     return (
       <main className="min-h-screen bg-black text-white flex items-center justify-center p-6">
         <div className="text-center animate-pulse">
           <h1 className="text-5xl font-black mb-6">
-            🍜 Bakmi Jelambar
+            🍜 Bakmie Jelambar
           </h1>
 
           <p className="text-gray-300 text-lg mb-8">
-            Selamat datang di Bakmi Jelambar <br />
+            Selamat datang di Bakmie Jelambar <br />
             Scan QR di meja untuk mulai pesan
           </p>
 
@@ -116,15 +119,23 @@ export default function Home() {
     );
   }
 
-  // ===== MAIN APP =====
   return (
     <main className="min-h-screen bg-gray-100 pb-40">
-      {/* HEADER */}
-      <div className="bg-black text-white p-6">
-        <h1 className="text-3xl font-bold">
-          🍜 Bakmi Jelambar
-        </h1>
-        <p className="text-gray-300">Meja 1</p>
+      {/* HEADER + HISTORY BUTTON */}
+      <div className="bg-black text-white p-6 flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold">
+            🍜 Bakmie Jelambar
+          </h1>
+          <p className="text-gray-300">Meja 1</p>
+        </div>
+
+        <button
+          onClick={() => setShowHistory(true)}
+          className="bg-white text-black px-4 py-2 rounded-xl font-bold"
+        >
+          History
+        </button>
       </div>
 
       {/* MENU */}
@@ -157,7 +168,7 @@ export default function Home() {
         ))}
       </div>
 
-      {/* CART (SLIDE UP STYLE) */}
+      {/* CART SLIDE UP */}
       {cart.length > 0 && (
         <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-[92%] max-w-md z-50 animate-slideUp">
           <div className="bg-black text-white rounded-t-3xl p-4 shadow-2xl">
@@ -262,7 +273,6 @@ export default function Home() {
       {receipt && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-6 z-50">
           <div className="bg-white w-full max-w-sm rounded-2xl p-6">
-
             <h2 className="text-2xl font-bold text-center mb-2">
               🧾 Struk Pesanan
             </h2>
@@ -302,7 +312,66 @@ export default function Home() {
         </div>
       )}
 
-      {/* SLIDE ANIMATION */}
+      {/* HISTORY */}
+      {showHistory && (
+        <div
+          className="fixed inset-0 bg-black/60 flex items-center justify-center p-6 z-50"
+          onClick={() => setShowHistory(false)}
+        >
+          <div
+            className="bg-white w-full max-w-sm rounded-2xl p-6 max-h-[80vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 className="text-2xl font-bold mb-4 text-center">
+              📦 Order History
+            </h2>
+
+            {orders.length === 0 ? (
+              <p className="text-center text-gray-500">
+                Belum ada pesanan
+              </p>
+            ) : (
+              orders.map((order) => (
+                <div
+                  key={order.id}
+                  className="border-b py-3 mb-3"
+                >
+                  <p className="text-sm text-gray-500">
+                    {order.time}
+                  </p>
+
+                  {order.items.map((item: any) => (
+                    <div
+                      key={item.id}
+                      className="flex justify-between text-sm"
+                    >
+                      <span>
+                        {item.name} x{item.qty}
+                      </span>
+                      <span>
+                        Rp {(item.price * item.qty).toLocaleString()}
+                      </span>
+                    </div>
+                  ))}
+
+                  <p className="font-bold mt-2">
+                    Total: Rp {order.total.toLocaleString()}
+                  </p>
+                </div>
+              ))
+            )}
+
+            <button
+              onClick={() => setShowHistory(false)}
+              className="w-full mt-4 bg-black text-white py-3 rounded-xl font-bold"
+            >
+              Tutup
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ANIMATION */}
       <style jsx>{`
         @keyframes slideUp {
           from {
