@@ -10,7 +10,6 @@ export default function Home() {
       price: 18000,
       image:
         "https://images.unsplash.com/photo-1612929633738-8fe44f7ec841?q=80&w=1200&auto=format&fit=crop",
-      category: "Best Seller",
     },
     {
       id: 2,
@@ -18,48 +17,47 @@ export default function Home() {
       price: 22000,
       image:
         "https://images.unsplash.com/photo-1555126634-323283e090fa?q=80&w=1200&auto=format&fit=crop",
-      category: "Favorite",
+    },
+    {
+      id: 3,
+      name: "Es Teh Manis",
+      price: 5000,
+      image:
+        "https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?q=80&w=1200&auto=format&fit=crop",
     },
   ];
 
   const [cart, setCart] = useState<any[]>([]);
-  const [started, setStarted] = useState(false);
 
   const addToCart = (item: any) => {
-    const existing = cart.find((c) => c.id === item.id);
+    setCart((prev) => {
+      const existing = prev.find((p) => p.id === item.id);
 
-    if (existing) {
-      setCart(
-        cart.map((c) =>
-          c.id === item.id
-            ? { ...c, qty: c.qty + 1 }
-            : c
-        )
-      );
-    } else {
-      setCart([...cart, { ...item, qty: 1 }]);
-    }
+      if (existing) {
+        return prev.map((p) =>
+          p.id === item.id ? { ...p, qty: p.qty + 1 } : p
+        );
+      }
+
+      return [...prev, { ...item, qty: 1 }];
+    });
   };
 
-  const increaseQty = (id: number) => {
-    setCart(
-      cart.map((item) =>
-        item.id === id
-          ? { ...item, qty: item.qty + 1 }
-          : item
+  const increase = (id: number) => {
+    setCart((prev) =>
+      prev.map((p) =>
+        p.id === id ? { ...p, qty: p.qty + 1 } : p
       )
     );
   };
 
-  const decreaseQty = (id: number) => {
-    setCart(
-      cart
-        .map((item) =>
-          item.id === id
-            ? { ...item, qty: item.qty - 1 }
-            : item
+  const decrease = (id: number) => {
+    setCart((prev) =>
+      prev
+        .map((p) =>
+          p.id === id ? { ...p, qty: p.qty - 1 } : p
         )
-        .filter((item) => item.qty > 0)
+        .filter((p) => p.qty > 0)
     );
   };
 
@@ -68,111 +66,76 @@ export default function Home() {
     0
   );
 
-  if (!started) {
-    return (
-      <main className="min-h-screen bg-black text-white flex items-center justify-center p-6">
-        <div className="text-center">
-          <h1 className="text-5xl font-black mb-6">
-            🍜 Bakmi Jelambar
-          </h1>
-
-          <button
-            onClick={() => setStarted(true)}
-            className="bg-white text-black px-8 py-4 rounded-3xl font-bold"
-          >
-            Mulai Pesan
-          </button>
-        </div>
-      </main>
-    );
-  }
-
   return (
     <main className="min-h-screen bg-gray-100 pb-40">
-      <div className="bg-black text-white p-6 rounded-b-[40px]">
-        <h1 className="text-4xl font-black">
-          🍜 Bakmi Jelambar
+      {/* HEADER */}
+      <div className="bg-black text-white p-6">
+        <h1 className="text-3xl font-bold">
+          🍜 Bakmie Jelambar
         </h1>
-
-        <p className="text-gray-300 mt-2">
-          Meja 4
-        </p>
+        <p className="text-gray-300">Meja 1</p>
       </div>
 
+      {/* MENU */}
       <div className="p-6 grid gap-6">
         {menu.map((item) => (
           <div
             key={item.id}
-            className="bg-white rounded-3xl shadow-xl overflow-hidden"
+            className="bg-white rounded-2xl shadow p-4"
           >
             <img
               src={item.image}
-              className="w-full h-64 object-cover"
+              className="w-full h-52 object-cover rounded-xl"
             />
 
-            <div className="p-6">
-              <h2 className="text-3xl font-black mb-2">
-                {item.name}
-              </h2>
+            <h2 className="text-xl font-bold mt-3">
+              {item.name}
+            </h2>
 
-              <p className="text-xl font-bold mb-6">
-                Rp {item.price.toLocaleString()}
-              </p>
+            <p className="text-gray-600">
+              Rp {item.price.toLocaleString()}
+            </p>
 
-              <button
-                onClick={() => addToCart(item)}
-                className="
-                  w-full
-                  bg-black
-                  text-white
-                  py-4
-                  rounded-3xl
-                  text-xl
-                  font-bold
-                  active:scale-90
-                  transition
-                "
-              >
-                🍜 Tambah ke Pesanan
-              </button>
-            </div>
+            <button
+              onClick={() => addToCart(item)}
+              className="w-full mt-3 bg-black text-white py-3 rounded-xl active:scale-95"
+            >
+              Tambah
+            </button>
           </div>
         ))}
       </div>
 
+      {/* CART FLOATING */}
       {cart.length > 0 && (
-        <div className="fixed bottom-5 left-1/2 -translate-x-1/2 w-[92%] max-w-md bg-black text-white rounded-3xl p-5 shadow-2xl">
-          <div className="space-y-4 mb-5">
+        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 w-[92%] max-w-md bg-black text-white rounded-2xl p-4 shadow-xl">
+          <div className="space-y-3">
             {cart.map((item) => (
               <div
                 key={item.id}
-                className="flex items-center justify-between"
+                className="flex justify-between items-center"
               >
                 <div>
-                  <p className="font-bold">
-                    {item.name}
-                  </p>
-
-                  <p className="text-gray-300">
+                  <p className="font-bold">{item.name}</p>
+                  <p className="text-sm text-gray-300">
                     Rp {(item.price * item.qty).toLocaleString()}
                   </p>
                 </div>
 
-                <div className="flex items-center gap-3">
+                {/* QTY BUTTON */}
+                <div className="flex items-center gap-2">
                   <button
-                    onClick={() => decreaseQty(item.id)}
-                    className="bg-white text-black w-10 h-10 rounded-full font-black"
+                    onClick={() => decrease(item.id)}
+                    className="w-8 h-8 bg-white text-black rounded-full font-bold"
                   >
-                    −
+                    -
                   </button>
 
-                  <span className="font-bold text-lg">
-                    {item.qty}
-                  </span>
+                  <span>{item.qty}</span>
 
                   <button
-                    onClick={() => increaseQty(item.id)}
-                    className="bg-white text-black w-10 h-10 rounded-full font-black"
+                    onClick={() => increase(item.id)}
+                    className="w-8 h-8 bg-white text-black rounded-full font-bold"
                   >
                     +
                   </button>
@@ -181,21 +144,17 @@ export default function Home() {
             ))}
           </div>
 
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-bold text-xl">
-                Total
-              </p>
-
-              <p className="text-gray-300">
-                Rp {total.toLocaleString()}
-              </p>
-            </div>
-
-            <button className="bg-white text-black px-6 py-3 rounded-2xl font-black">
-              Checkout
-            </button>
+          {/* TOTAL */}
+          <div className="flex justify-between mt-4 border-t border-gray-600 pt-3">
+            <p className="font-bold">Total</p>
+            <p className="font-bold">
+              Rp {total.toLocaleString()}
+            </p>
           </div>
+
+          <button className="w-full mt-3 bg-white text-black py-3 rounded-xl font-bold">
+            Checkout
+          </button>
         </div>
       )}
     </main>
