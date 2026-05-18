@@ -31,7 +31,9 @@ export default function Home() {
   const [cart, setCart] = useState<any[]>([]);
   const [showConfirm, setShowConfirm] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [receipt, setReceipt] = useState<any | null>(null);
 
+  // ADD TO CART
   const addToCart = (item: any) => {
     setCart((prev) => {
       const exist = prev.find((p) => p.id === item.id);
@@ -69,14 +71,24 @@ export default function Home() {
     0
   );
 
-  const checkout = () => setShowConfirm(true);
+  // CHECKOUT
+  const checkout = () => {
+    setShowConfirm(true);
+  };
 
   const confirmYes = () => {
+    const orderData = {
+      items: cart,
+      total: total,
+      time: new Date().toLocaleString(),
+    };
+
+    setReceipt(orderData);
     setCart([]);
     setShowConfirm(false);
     setSuccess(true);
 
-    setTimeout(() => setSuccess(false), 2500);
+    setTimeout(() => setSuccess(false), 2000);
   };
 
   // ===== WELCOME SCREEN =====
@@ -90,7 +102,7 @@ export default function Home() {
 
           <p className="text-gray-300 text-lg mb-8">
             Selamat datang di Bakmi Jelambar <br />
-            Silakan scan QR di meja untuk memesan
+            Scan QR di meja untuk mulai pesan
           </p>
 
           <button
@@ -198,7 +210,7 @@ export default function Home() {
         </div>
       )}
 
-      {/* CONFIRM MODAL */}
+      {/* CHECKOUT CONFIRM */}
       {showConfirm && (
         <div
           className="fixed inset-0 bg-black/60 flex items-center justify-center p-6"
@@ -231,13 +243,6 @@ export default function Home() {
                 Ya
               </button>
             </div>
-
-            <button
-              onClick={() => setShowConfirm(false)}
-              className="mt-3 text-sm text-gray-500 underline"
-            >
-              Tutup
-            </button>
           </div>
         </div>
       )}
@@ -253,7 +258,51 @@ export default function Home() {
         </div>
       )}
 
-      {/* ANIMATION STYLE */}
+      {/* RECEIPT */}
+      {receipt && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-6 z-50">
+          <div className="bg-white w-full max-w-sm rounded-2xl p-6">
+
+            <h2 className="text-2xl font-bold text-center mb-2">
+              🧾 Struk Pesanan
+            </h2>
+
+            <p className="text-center text-gray-500 text-sm mb-4">
+              {receipt.time}
+            </p>
+
+            <div className="border-t border-b py-3 mb-4">
+              {receipt.items.map((item: any) => (
+                <div
+                  key={item.id}
+                  className="flex justify-between text-sm mb-2"
+                >
+                  <span>
+                    {item.name} x{item.qty}
+                  </span>
+                  <span>
+                    Rp {(item.price * item.qty).toLocaleString()}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex justify-between font-bold text-lg mb-4">
+              <span>Total</span>
+              <span>Rp {receipt.total.toLocaleString()}</span>
+            </div>
+
+            <button
+              onClick={() => setReceipt(null)}
+              className="w-full bg-black text-white py-3 rounded-xl font-bold"
+            >
+              Tutup Struk
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* SLIDE ANIMATION */}
       <style jsx>{`
         @keyframes slideUp {
           from {
