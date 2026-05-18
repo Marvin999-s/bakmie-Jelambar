@@ -38,6 +38,12 @@ export default function Home() {
   const tableNumber = "Meja 4";
 
   const addToCart = (item: any) => {
+    const audio = new Audio(
+      "https://www.myinstants.com/media/sounds/click.mp3"
+    );
+
+    audio.play();
+
     const existing = cart.find((c) => c.id === item.id);
 
     if (existing) {
@@ -69,23 +75,36 @@ export default function Home() {
 
   if (!started) {
     return (
-      <main className="min-h-screen bg-black text-white flex items-center justify-center p-6">
-        <div className="max-w-xl text-center">
-          <h1 className="text-5xl font-bold mb-6">
+      <main className="min-h-screen bg-gradient-to-b from-black to-gray-900 text-white flex items-center justify-center p-6">
+        <div className="max-w-xl text-center animate-pulse">
+          <h1 className="text-6xl font-black mb-6">
             🍜 Bakmi Jelambar
           </h1>
 
-          <p className="text-gray-300 text-lg mb-8 leading-relaxed">
+          <p className="text-gray-300 text-xl mb-10 leading-relaxed">
             Selamat datang di Bakmi Jelambar.
             <br />
-            Silakan scan QR dan pesan makanan favorit Anda langsung dari meja tanpa menunggu pelayan.
+            Scan QR dan pesan makanan favorit Anda langsung dari meja.
           </p>
 
           <button
             onClick={() => setStarted(true)}
-            className="bg-white text-black px-8 py-4 rounded-2xl text-lg font-bold"
+            className="
+              bg-white
+              text-black
+              px-10
+              py-5
+              rounded-3xl
+              text-xl
+              font-bold
+              transition
+              duration-200
+              hover:scale-105
+              active:scale-95
+              shadow-2xl
+            "
           >
-            Mulai Pesan
+            Mulai Pesan 🍜
           </button>
         </div>
       </main>
@@ -93,12 +112,12 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen bg-gray-100">
+    <main className="min-h-screen bg-gray-100 pb-40">
       {/* HEADER */}
-      <div className="bg-black text-white p-6 rounded-b-[40px] shadow-xl">
+      <div className="bg-black text-white p-6 rounded-b-[40px] shadow-2xl sticky top-0 z-40">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div>
-            <h1 className="text-4xl font-bold">
+            <h1 className="text-4xl font-black">
               🍜 Bakmi Jelambar
             </h1>
 
@@ -107,165 +126,143 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="bg-white text-black px-5 py-3 rounded-2xl font-bold shadow-lg">
+          <div className="bg-white text-black px-5 py-3 rounded-2xl font-bold shadow-lg animate-pulse">
             🛒 {cart.length}
           </div>
         </div>
       </div>
 
-      {/* CONTENT */}
-      <div className="max-w-6xl mx-auto p-6 grid lg:grid-cols-3 gap-6">
-
-        {/* MENU */}
-        <div className="lg:col-span-2 space-y-6">
-          {menu.map((item) => (
-            <div
-              key={item.id}
-              className="bg-white rounded-3xl shadow-lg overflow-hidden"
-            >
-              <img
-                src={item.image}
-                alt={item.name}
-                className="w-full h-60 object-cover"
-              />
-
-              <div className="p-6">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="bg-black text-white text-sm px-4 py-1 rounded-full">
-                    {item.category}
-                  </span>
-
-                  <span className="text-2xl font-bold">
-                    Rp {item.price.toLocaleString()}
-                  </span>
-                </div>
-
-                <h2 className="text-3xl font-bold mb-4">
-                  {item.name}
-                </h2>
-
-                <button
-                  onClick={() => addToCart(item)}
-                  className="w-full bg-black text-white py-4 rounded-2xl text-lg font-semibold"
-                >
-                  Tambah ke Pesanan
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* CART */}
-        <div className="bg-white rounded-3xl shadow-xl p-6 h-fit sticky top-6">
-          <h2 className="text-3xl font-bold mb-6">
-            📋 Pesanan Anda
-          </h2>
-
-          <div className="space-y-4 mb-6">
-            {cart.length === 0 && (
-              <p className="text-gray-500">
-                Belum ada pesanan.
-              </p>
-            )}
-
-            {cart.map((item, index) => (
-              <div
-                key={index}
-                className="border rounded-2xl p-4"
-              >
-                <div className="flex justify-between items-center">
-                  <div>
-                    <p className="font-bold text-lg">
-                      {item.name}
-                    </p>
-
-                    <p className="text-gray-500">
-                      {item.qty} x Rp {item.price.toLocaleString()}
-                    </p>
-                  </div>
-
-                  <p className="font-bold">
-                    Rp {(item.qty * item.price).toLocaleString()}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="mb-6">
-            <label className="font-semibold block mb-3 text-lg">
-              Metode Pembayaran
-            </label>
-
-            <select
-              value={payment}
-              onChange={(e) => setPayment(e.target.value)}
-              className="w-full border rounded-2xl p-4"
-            >
-              <option>QRIS</option>
-              <option>Cash</option>
-              <option>BCA</option>
-            </select>
-          </div>
-
-          <div className="flex justify-between items-center mb-6">
-            <span className="text-2xl font-bold">
-              Total
-            </span>
-
-            <span className="text-3xl font-bold">
-              Rp {total.toLocaleString()}
-            </span>
-          </div>
-
-          <button
-            onClick={orderNow}
-            className="w-full bg-black text-white py-5 rounded-2xl text-xl font-bold"
+      {/* MENU */}
+      <div className="max-w-6xl mx-auto p-6 grid lg:grid-cols-2 gap-8">
+        {menu.map((item) => (
+          <div
+            key={item.id}
+            className="
+              bg-white
+              rounded-[30px]
+              shadow-xl
+              overflow-hidden
+              transition
+              duration-300
+              hover:scale-[1.02]
+            "
           >
-            Pesan Sekarang
-          </button>
+            <img
+              src={item.image}
+              alt={item.name}
+              className="w-full h-72 object-cover"
+            />
 
-          {success && (
-            <div className="mt-6 bg-green-100 border border-green-300 rounded-2xl p-5 text-green-700">
-              <p className="font-bold text-lg mb-2">
-                ✅ Pesanan berhasil dikirim!
-              </p>
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <span className="bg-black text-white text-sm px-4 py-2 rounded-full">
+                  {item.category}
+                </span>
 
-              <p>
-                Mohon tunggu, pesanan Anda sedang diproses.
-              </p>
+                <span className="text-3xl font-black">
+                  Rp {item.price.toLocaleString()}
+                </span>
+              </div>
+
+              <h2 className="text-4xl font-black mb-6">
+                {item.name}
+              </h2>
+
+              <button
+                onClick={() => addToCart(item)}
+                className="
+                  w-full
+                  bg-black
+                  text-white
+                  py-5
+                  rounded-3xl
+                  text-xl
+                  font-bold
+                  transition
+                  duration-150
+                  transform
+                  hover:scale-[1.03]
+                  active:scale-90
+                  active:bg-gray-800
+                  shadow-2xl
+                "
+              >
+                🍜 Tambah ke Pesanan
+              </button>
             </div>
-          )}
-        </div>
+          </div>
+        ))}
       </div>
 
-      {/* ADMIN */}
-      <div className="max-w-6xl mx-auto p-6">
-        <div className="bg-white rounded-3xl shadow-xl p-6">
-          <h2 className="text-3xl font-bold mb-6">
-            🔔 Dashboard Admin
-          </h2>
-
-          <div className="border rounded-3xl p-6 flex justify-between items-center">
+      {/* FLOATING CART */}
+      {cart.length > 0 && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] max-w-md z-50 animate-pulse">
+          <div className="bg-black text-white rounded-[30px] shadow-2xl p-5 flex items-center justify-between">
             <div>
-              <p className="font-bold text-xl mb-2">
-                Meja 4
+              <p className="font-black text-xl">
+                🛒 {cart.length} Pesanan
               </p>
 
-              <p>2 Bakmie Ayam Special</p>
-              <p>1 Es Teh Manis</p>
-
-              <p className="text-gray-500 mt-3">
-                Pembayaran: QRIS
+              <p className="text-gray-300 text-lg">
+                Rp {total.toLocaleString()}
               </p>
             </div>
 
-            <button className="bg-black text-white px-6 py-3 rounded-2xl font-semibold">
-              Sedang Dimasak
+            <button
+              onClick={orderNow}
+              className="
+                bg-white
+                text-black
+                px-7
+                py-4
+                rounded-2xl
+                font-black
+                transition
+                hover:scale-105
+                active:scale-95
+              "
+            >
+              Checkout
             </button>
           </div>
         </div>
-      </div>
+      )}
+
+      {/* SUCCESS MODAL */}
+      {success && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-6">
+          <div className="bg-white rounded-[40px] p-10 max-w-md w-full text-center animate-pulse shadow-2xl">
+            <h2 className="text-6xl mb-5">
+              ✅
+            </h2>
+
+            <h3 className="text-3xl font-black mb-4">
+              Pesanan Berhasil!
+            </h3>
+
+            <p className="text-gray-600 text-lg mb-8">
+              Pesanan Anda sedang diproses oleh dapur Bakmi Jelambar 🍜
+            </p>
+
+            <button
+              onClick={() => setSuccess(false)}
+              className="
+                bg-black
+                text-white
+                px-8
+                py-4
+                rounded-3xl
+                font-black
+                transition
+                hover:scale-105
+                active:scale-95
+              "
+            >
+              Tutup
+            </button>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
