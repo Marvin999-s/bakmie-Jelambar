@@ -27,15 +27,16 @@ export default function Home() {
     },
   ];
 
+  const [started, setStarted] = useState(false);
   const [cart, setCart] = useState<any[]>([]);
   const [showConfirm, setShowConfirm] = useState(false);
   const [success, setSuccess] = useState(false);
 
   const addToCart = (item: any) => {
     setCart((prev) => {
-      const existing = prev.find((p) => p.id === item.id);
+      const exist = prev.find((p) => p.id === item.id);
 
-      if (existing) {
+      if (exist) {
         return prev.map((p) =>
           p.id === item.id ? { ...p, qty: p.qty + 1 } : p
         );
@@ -68,26 +69,48 @@ export default function Home() {
     0
   );
 
-  const confirmCheckout = () => {
-    setShowConfirm(true);
-  };
+  const checkout = () => setShowConfirm(true);
 
-  const yesCheckout = () => {
+  const confirmYes = () => {
     setCart([]);
     setShowConfirm(false);
     setSuccess(true);
 
-    setTimeout(() => {
-      setSuccess(false);
-    }, 3000);
+    setTimeout(() => setSuccess(false), 3000);
   };
 
+  // ===== WELCOME SCREEN =====
+  if (!started) {
+    return (
+      <main className="min-h-screen bg-black text-white flex items-center justify-center p-6">
+        <div className="text-center animate-pulse">
+          <h1 className="text-5xl font-black mb-6">
+            🍜 Bakmi Jelambar
+          </h1>
+
+          <p className="text-gray-300 text-lg mb-8">
+            Selamat datang di Bakmi Jelambar <br />
+            Silakan scan QR di meja untuk mulai memesan
+          </p>
+
+          <button
+            onClick={() => setStarted(true)}
+            className="bg-white text-black px-8 py-4 rounded-2xl font-bold"
+          >
+            Mulai Pesan
+          </button>
+        </div>
+      </main>
+    );
+  }
+
+  // ===== MAIN APP =====
   return (
     <main className="min-h-screen bg-gray-100 pb-40">
       {/* HEADER */}
       <div className="bg-black text-white p-6">
         <h1 className="text-3xl font-bold">
-          🍜 Bakmie Jelambar
+          🍜 Bakmi Jelambar
         </h1>
         <p className="text-gray-300">Meja 1</p>
       </div>
@@ -165,7 +188,7 @@ export default function Home() {
           </div>
 
           <button
-            onClick={confirmCheckout}
+            onClick={checkout}
             className="w-full mt-3 bg-white text-black py-3 rounded-xl font-bold"
           >
             Checkout
@@ -173,29 +196,25 @@ export default function Home() {
         </div>
       )}
 
-      {/* CONFIRM POPUP */}
+      {/* CONFIRM */}
       {showConfirm && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-6">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-sm text-center">
+          <div className="bg-white p-6 rounded-2xl text-center w-full max-w-sm">
             <h2 className="text-xl font-bold mb-4">
-              Konfirmasi Pesanan?
+              Yakin Checkout?
             </h2>
-
-            <p className="mb-6 text-gray-600">
-              Total Rp {total.toLocaleString()}
-            </p>
 
             <div className="flex gap-3">
               <button
                 onClick={() => setShowConfirm(false)}
-                className="flex-1 bg-gray-200 py-3 rounded-xl font-bold"
+                className="flex-1 bg-gray-200 py-3 rounded-xl"
               >
                 Tidak
               </button>
 
               <button
-                onClick={yesCheckout}
-                className="flex-1 bg-black text-white py-3 rounded-xl font-bold"
+                onClick={confirmYes}
+                className="flex-1 bg-black text-white py-3 rounded-xl"
               >
                 Ya
               </button>
@@ -206,8 +225,8 @@ export default function Home() {
 
       {/* SUCCESS */}
       {success && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-6">
-          <div className="bg-white rounded-2xl p-6 text-center">
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center">
+          <div className="bg-white p-6 rounded-2xl text-center">
             <h2 className="text-2xl font-bold">
               Pesanan Berhasil 🍜
             </h2>
