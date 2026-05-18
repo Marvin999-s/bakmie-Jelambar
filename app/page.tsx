@@ -35,7 +35,6 @@ export default function Home() {
   const [receipt, setReceipt] = useState<any | null>(null);
   const [showHistory, setShowHistory] = useState(false);
 
-  // HISTORY (LOAD FROM STORAGE)
   const [orders, setOrders] = useState<any[]>(() => {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("orders");
@@ -44,22 +43,20 @@ export default function Home() {
     return [];
   });
 
-  // CLEAN OLD ORDERS (24 JAM)
+  // CLEAN 24 JAM
   if (typeof window !== "undefined") {
     const saved = localStorage.getItem("orders");
     if (saved) {
       const parsed = JSON.parse(saved);
 
       const filtered = parsed.filter((order: any) => {
-        const age = Date.now() - order.id;
-        return age < 24 * 60 * 60 * 1000;
+        return Date.now() - order.id < 24 * 60 * 60 * 1000;
       });
 
       localStorage.setItem("orders", JSON.stringify(filtered));
     }
   }
 
-  // ADD TO CART
   const addToCart = (item: any) => {
     setCart((prev) => {
       const exist = prev.find((p) => p.id === item.id);
@@ -119,23 +116,21 @@ export default function Home() {
     setTimeout(() => setSuccess(false), 2000);
   };
 
-  // WELCOME
   if (!started) {
     return (
       <main className="min-h-screen bg-black text-white flex items-center justify-center p-6">
-        <div className="text-center animate-pulse">
+        <div className="text-center">
           <h1 className="text-5xl font-black mb-6">
             🍜 Bakmi Jelambar
           </h1>
 
-          <p className="text-gray-300 text-lg mb-8">
-            Selamat datang <br />
-            Scan QR di meja untuk pesan
+          <p className="text-gray-300 mb-8">
+            Scan QR di meja untuk mulai pesan
           </p>
 
           <button
             onClick={() => setStarted(true)}
-            className="bg-white text-black px-8 py-4 rounded-2xl font-bold"
+            className="bg-white text-black px-8 py-4 rounded-2xl font-bold text-lg"
           >
             Mulai Pesan
           </button>
@@ -176,17 +171,17 @@ export default function Home() {
               className="w-full h-52 object-cover rounded-xl"
             />
 
-            <h2 className="text-xl font-bold mt-3">
+            <h2 className="text-xl font-bold mt-3 text-black">
               {item.name}
             </h2>
 
-            <p className="text-gray-600">
+            <p className="text-gray-700 font-medium">
               Rp {item.price.toLocaleString()}
             </p>
 
             <button
               onClick={() => addToCart(item)}
-              className="w-full mt-3 bg-black text-white py-3 rounded-xl"
+              className="w-full mt-3 bg-black text-white py-4 rounded-xl font-bold text-lg"
             >
               Tambah
             </button>
@@ -202,7 +197,7 @@ export default function Home() {
             {cart.map((item) => (
               <div
                 key={item.id}
-                className="flex justify-between mb-2"
+                className="flex justify-between mb-3"
               >
                 <div>
                   <p className="font-bold">{item.name}</p>
@@ -220,13 +215,15 @@ export default function Home() {
             ))}
 
             <div className="flex justify-between border-t pt-2">
-              <p>Total</p>
-              <p>Rp {total.toLocaleString()}</p>
+              <p className="font-bold">Total</p>
+              <p className="font-bold">
+                Rp {total.toLocaleString()}
+              </p>
             </div>
 
             <button
               onClick={checkout}
-              className="w-full mt-3 bg-white text-black py-3 rounded-xl font-bold"
+              className="w-full mt-3 bg-white text-black py-3 rounded-xl font-bold text-lg"
             >
               Checkout
             </button>
@@ -234,19 +231,39 @@ export default function Home() {
         </div>
       )}
 
-      {/* CONFIRM */}
+      {/* CHECKOUT */}
       {showConfirm && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center">
-          <div className="bg-white p-6 rounded-xl">
-            <p>Yakin checkout?</p>
+          <div className="bg-white p-6 rounded-xl w-[90%] max-w-sm text-center">
 
-            <button onClick={() => setShowConfirm(false)}>
-              Tidak
-            </button>
+            <p className="text-lg font-bold mb-4">
+              Yakin Checkout?
+            </p>
 
-            <button onClick={confirmYes}>
-              Ya
-            </button>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowConfirm(false)}
+                className="flex-1 bg-gray-200 py-3 rounded-xl font-bold text-black"
+              >
+                Tidak
+              </button>
+
+              <button
+                onClick={confirmYes}
+                className="flex-1 bg-black text-white py-3 rounded-xl font-bold"
+              >
+                Ya
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* SUCCESS */}
+      {success && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center">
+          <div className="bg-white p-6 rounded-xl font-bold">
+            Pesanan Berhasil 🍜
           </div>
         </div>
       )}
@@ -291,14 +308,14 @@ export default function Home() {
                 link.download = `struk-${Date.now()}.png`;
                 link.click();
               }}
-              className="w-full mt-3 bg-gray-200 py-2 rounded-xl"
+              className="w-full mt-3 bg-gray-200 py-2 rounded-xl font-bold"
             >
               Download Struk
             </button>
 
             <button
               onClick={() => setReceipt(null)}
-              className="w-full mt-2 bg-black text-white py-2 rounded-xl"
+              className="w-full mt-2 bg-black text-white py-2 rounded-xl font-bold"
             >
               Tutup
             </button>
@@ -346,7 +363,7 @@ export default function Home() {
         </div>
       )}
 
-      {/* ANIMASI */}
+      {/* ANIMASI CART */}
       <style jsx>{`
         @keyframes slideUp {
           from {
