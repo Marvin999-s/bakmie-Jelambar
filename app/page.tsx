@@ -32,6 +32,7 @@ export default function Home() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [success, setSuccess] = useState(false);
 
+  // ADD ITEM
   const addToCart = (item: any) => {
     setCart((prev) => {
       const exist = prev.find((p) => p.id === item.id);
@@ -46,6 +47,7 @@ export default function Home() {
     });
   };
 
+  // + QTY
   const increase = (id: number) => {
     setCart((prev) =>
       prev.map((p) =>
@@ -54,6 +56,7 @@ export default function Home() {
     );
   };
 
+  // - QTY
   const decrease = (id: number) => {
     setCart((prev) =>
       prev
@@ -69,17 +72,19 @@ export default function Home() {
     0
   );
 
-  const checkout = () => setShowConfirm(true);
+  const checkout = () => {
+    setShowConfirm(true);
+  };
 
   const confirmYes = () => {
     setCart([]);
     setShowConfirm(false);
     setSuccess(true);
 
-    setTimeout(() => setSuccess(false), 3000);
+    setTimeout(() => setSuccess(false), 2500);
   };
 
-  // ===== WELCOME SCREEN =====
+  // ================= WELCOME SCREEN =================
   if (!started) {
     return (
       <main className="min-h-screen bg-black text-white flex items-center justify-center p-6">
@@ -90,12 +95,12 @@ export default function Home() {
 
           <p className="text-gray-300 text-lg mb-8">
             Selamat datang di Bakmi Jelambar <br />
-            Silakan scan QR di meja untuk mulai memesan
+            Silakan scan QR di meja untuk memesan
           </p>
 
           <button
             onClick={() => setStarted(true)}
-            className="bg-white text-black px-8 py-4 rounded-2xl font-bold"
+            className="bg-white text-black px-8 py-4 rounded-2xl font-bold active:scale-95"
           >
             Mulai Pesan
           </button>
@@ -104,7 +109,7 @@ export default function Home() {
     );
   }
 
-  // ===== MAIN APP =====
+  // ================= MAIN APP =================
   return (
     <main className="min-h-screen bg-gray-100 pb-40">
       {/* HEADER */}
@@ -196,29 +201,46 @@ export default function Home() {
         </div>
       )}
 
-      {/* CONFIRM */}
+      {/* CONFIRM MODAL (FIX MOBILE CLOSE) */}
       {showConfirm && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-6">
-          <div className="bg-white p-6 rounded-2xl text-center w-full max-w-sm">
-            <h2 className="text-xl font-bold mb-4">
+        <div
+          className="fixed inset-0 bg-black/60 flex items-center justify-center p-6"
+          onClick={() => setShowConfirm(false)}
+        >
+          <div
+            className="bg-white p-6 rounded-2xl text-center w-full max-w-sm"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 className="text-xl font-bold mb-2">
               Yakin Checkout?
             </h2>
+
+            <p className="text-gray-500 mb-4">
+              Total Rp {total.toLocaleString()}
+            </p>
 
             <div className="flex gap-3">
               <button
                 onClick={() => setShowConfirm(false)}
-                className="flex-1 bg-gray-200 py-3 rounded-xl"
+                className="flex-1 bg-gray-200 py-3 rounded-xl font-bold"
               >
                 Tidak
               </button>
 
               <button
                 onClick={confirmYes}
-                className="flex-1 bg-black text-white py-3 rounded-xl"
+                className="flex-1 bg-black text-white py-3 rounded-xl font-bold"
               >
                 Ya
               </button>
             </div>
+
+            <button
+              onClick={() => setShowConfirm(false)}
+              className="mt-3 text-sm text-gray-500 underline"
+            >
+              Tutup
+            </button>
           </div>
         </div>
       )}
