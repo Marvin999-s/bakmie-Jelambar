@@ -32,7 +32,6 @@ export default function Home() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [success, setSuccess] = useState(false);
 
-  // ADD ITEM
   const addToCart = (item: any) => {
     setCart((prev) => {
       const exist = prev.find((p) => p.id === item.id);
@@ -47,7 +46,6 @@ export default function Home() {
     });
   };
 
-  // + QTY
   const increase = (id: number) => {
     setCart((prev) =>
       prev.map((p) =>
@@ -56,7 +54,6 @@ export default function Home() {
     );
   };
 
-  // - QTY
   const decrease = (id: number) => {
     setCart((prev) =>
       prev
@@ -72,9 +69,7 @@ export default function Home() {
     0
   );
 
-  const checkout = () => {
-    setShowConfirm(true);
-  };
+  const checkout = () => setShowConfirm(true);
 
   const confirmYes = () => {
     setCart([]);
@@ -84,7 +79,7 @@ export default function Home() {
     setTimeout(() => setSuccess(false), 2500);
   };
 
-  // ================= WELCOME SCREEN =================
+  // ===== WELCOME SCREEN =====
   if (!started) {
     return (
       <main className="min-h-screen bg-black text-white flex items-center justify-center p-6">
@@ -109,7 +104,7 @@ export default function Home() {
     );
   }
 
-  // ================= MAIN APP =================
+  // ===== MAIN APP =====
   return (
     <main className="min-h-screen bg-gray-100 pb-40">
       {/* HEADER */}
@@ -150,58 +145,60 @@ export default function Home() {
         ))}
       </div>
 
-      {/* CART */}
+      {/* CART (SLIDE UP STYLE) */}
       {cart.length > 0 && (
-        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 w-[92%] max-w-md bg-black text-white rounded-2xl p-4">
-          {cart.map((item) => (
-            <div
-              key={item.id}
-              className="flex justify-between items-center mb-3"
-            >
-              <div>
-                <p className="font-bold">{item.name}</p>
-                <p className="text-gray-300">
-                  Rp {(item.price * item.qty).toLocaleString()}
-                </p>
+        <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-[92%] max-w-md z-50 animate-slideUp">
+          <div className="bg-black text-white rounded-t-3xl p-4 shadow-2xl">
+            {cart.map((item) => (
+              <div
+                key={item.id}
+                className="flex justify-between items-center mb-3"
+              >
+                <div>
+                  <p className="font-bold">{item.name}</p>
+                  <p className="text-gray-300">
+                    Rp {(item.price * item.qty).toLocaleString()}
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => decrease(item.id)}
+                    className="w-8 h-8 bg-white text-black rounded-full font-bold"
+                  >
+                    -
+                  </button>
+
+                  <span>{item.qty}</span>
+
+                  <button
+                    onClick={() => increase(item.id)}
+                    className="w-8 h-8 bg-white text-black rounded-full font-bold"
+                  >
+                    +
+                  </button>
+                </div>
               </div>
+            ))}
 
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => decrease(item.id)}
-                  className="w-8 h-8 bg-white text-black rounded-full font-bold"
-                >
-                  -
-                </button>
-
-                <span>{item.qty}</span>
-
-                <button
-                  onClick={() => increase(item.id)}
-                  className="w-8 h-8 bg-white text-black rounded-full font-bold"
-                >
-                  +
-                </button>
-              </div>
+            <div className="flex justify-between border-t border-gray-600 pt-3">
+              <p className="font-bold">Total</p>
+              <p className="font-bold">
+                Rp {total.toLocaleString()}
+              </p>
             </div>
-          ))}
 
-          <div className="flex justify-between border-t border-gray-600 pt-3">
-            <p className="font-bold">Total</p>
-            <p className="font-bold">
-              Rp {total.toLocaleString()}
-            </p>
+            <button
+              onClick={checkout}
+              className="w-full mt-3 bg-white text-black py-3 rounded-xl font-bold"
+            >
+              Checkout
+            </button>
           </div>
-
-          <button
-            onClick={checkout}
-            className="w-full mt-3 bg-white text-black py-3 rounded-xl font-bold"
-          >
-            Checkout
-          </button>
         </div>
       )}
 
-      {/* CONFIRM MODAL (FIX MOBILE CLOSE) */}
+      {/* CONFIRM MODAL */}
       {showConfirm && (
         <div
           className="fixed inset-0 bg-black/60 flex items-center justify-center p-6"
@@ -255,6 +252,24 @@ export default function Home() {
           </div>
         </div>
       )}
+
+      {/* ANIMATION STYLE */}
+      <style jsx>{`
+        @keyframes slideUp {
+          from {
+            transform: translate(-50%, 100%);
+            opacity: 0;
+          }
+          to {
+            transform: translate(-50%, 0%);
+            opacity: 1;
+          }
+        }
+
+        .animate-slideUp {
+          animation: slideUp 0.25s ease-out;
+        }
+      `}</style>
     </main>
   );
 }
