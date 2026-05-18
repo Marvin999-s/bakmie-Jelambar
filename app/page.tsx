@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import html2canvas from "html2canvas";
 
 export default function Home() {
   const menu = [
@@ -32,8 +33,31 @@ export default function Home() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [success, setSuccess] = useState(false);
   const [receipt, setReceipt] = useState<any | null>(null);
-  const [orders, setOrders] = useState<any[]>([]);
   const [showHistory, setShowHistory] = useState(false);
+
+  // HISTORY (LOAD FROM STORAGE)
+  const [orders, setOrders] = useState<any[]>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("orders");
+      return saved ? JSON.parse(saved) : [];
+    }
+    return [];
+  });
+
+  // CLEAN OLD ORDERS (24 JAM)
+  if (typeof window !== "undefined") {
+    const saved = localStorage.getItem("orders");
+    if (saved) {
+      const parsed = JSON.parse(saved);
+
+      const filtered = parsed.filter((order: any) => {
+        const age = Date.now() - order.id;
+        return age < 24 * 60 * 60 * 1000;
+      });
+
+      localStorage.setItem("orders", JSON.stringify(filtered));
+    }
+  }
 
   // ADD TO CART
   const addToCart = (item: any) => {
@@ -73,7 +97,6 @@ export default function Home() {
     0
   );
 
-  // CHECKOUT
   const checkout = () => setShowConfirm(true);
 
   const confirmYes = () => {
@@ -84,9 +107,11 @@ export default function Home() {
       time: new Date().toLocaleString(),
     };
 
-    setOrders((prev) => [orderData, ...prev]);
-    setReceipt(orderData);
+    const updated = [orderData, ...orders];
+    setOrders(updated);
+    localStorage.setItem("orders", JSON.stringify(updated));
 
+    setReceipt(orderData);
     setCart([]);
     setShowConfirm(false);
     setSuccess(true);
@@ -94,23 +119,23 @@ export default function Home() {
     setTimeout(() => setSuccess(false), 2000);
   };
 
-  // ===== WELCOME =====
+  // WELCOME
   if (!started) {
     return (
       <main className="min-h-screen bg-black text-white flex items-center justify-center p-6">
         <div className="text-center animate-pulse">
           <h1 className="text-5xl font-black mb-6">
-            🍜 Bakmie Jelambar
+            🍜 Bakmi Jelambar
           </h1>
 
           <p className="text-gray-300 text-lg mb-8">
-            Selamat datang di Bakmie Jelambar <br />
-            Scan QR di meja untuk mulai pesan
+            Selamat datang <br />
+            Scan QR di meja untuk pesan
           </p>
 
           <button
             onClick={() => setStarted(true)}
-            className="bg-white text-black px-8 py-4 rounded-2xl font-bold active:scale-95"
+            className="bg-white text-black px-8 py-4 rounded-2xl font-bold"
           >
             Mulai Pesan
           </button>
@@ -121,11 +146,12 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-gray-100 pb-40">
-      {/* HEADER + HISTORY BUTTON */}
+
+      {/* HEADER */}
       <div className="bg-black text-white p-6 flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold">
-            🍜 Bakmie Jelambar
+            🍜 Bakmi Jelambar
           </h1>
           <p className="text-gray-300">Meja 1</p>
         </div>
@@ -160,7 +186,7 @@ export default function Home() {
 
             <button
               onClick={() => addToCart(item)}
-              className="w-full mt-3 bg-black text-white py-3 rounded-xl active:scale-95"
+              className="w-full mt-3 bg-black text-white py-3 rounded-xl"
             >
               Tambah
             </button>
@@ -168,14 +194,15 @@ export default function Home() {
         ))}
       </div>
 
-      {/* CART SLIDE UP */}
+      {/* CART */}
       {cart.length > 0 && (
         <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-[92%] max-w-md z-50 animate-slideUp">
-          <div className="bg-black text-white rounded-t-3xl p-4 shadow-2xl">
+          <div className="bg-black text-white rounded-t-3xl p-4">
+
             {cart.map((item) => (
               <div
                 key={item.id}
-                className="flex justify-between items-center mb-3"
+                className="flex justify-between mb-2"
               >
                 <div>
                   <p className="font-bold">{item.name}</p>
@@ -185,30 +212,16 @@ export default function Home() {
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => decrease(item.id)}
-                    className="w-8 h-8 bg-white text-black rounded-full font-bold"
-                  >
-                    -
-                  </button>
-
+                  <button onClick={() => decrease(item.id)}>-</button>
                   <span>{item.qty}</span>
-
-                  <button
-                    onClick={() => increase(item.id)}
-                    className="w-8 h-8 bg-white text-black rounded-full font-bold"
-                  >
-                    +
-                  </button>
+                  <button onClick={() => increase(item.id)}>+</button>
                 </div>
               </div>
             ))}
 
-            <div className="flex justify-between border-t border-gray-600 pt-3">
-              <p className="font-bold">Total</p>
-              <p className="font-bold">
-                Rp {total.toLocaleString()}
-              </p>
+            <div className="flex justify-between border-t pt-2">
+              <p>Total</p>
+              <p>Rp {total.toLocaleString()}</p>
             </div>
 
             <button
@@ -221,50 +234,19 @@ export default function Home() {
         </div>
       )}
 
-      {/* CHECKOUT CONFIRM */}
+      {/* CONFIRM */}
       {showConfirm && (
-        <div
-          className="fixed inset-0 bg-black/60 flex items-center justify-center p-6"
-          onClick={() => setShowConfirm(false)}
-        >
-          <div
-            className="bg-white p-6 rounded-2xl text-center w-full max-w-sm"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h2 className="text-xl font-bold mb-2">
-              Yakin Checkout?
-            </h2>
-
-            <p className="text-gray-500 mb-4">
-              Total Rp {total.toLocaleString()}
-            </p>
-
-            <div className="flex gap-3">
-              <button
-                onClick={() => setShowConfirm(false)}
-                className="flex-1 bg-gray-200 py-3 rounded-xl font-bold"
-              >
-                Tidak
-              </button>
-
-              <button
-                onClick={confirmYes}
-                className="flex-1 bg-black text-white py-3 rounded-xl font-bold"
-              >
-                Ya
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* SUCCESS */}
-      {success && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center">
-          <div className="bg-white p-6 rounded-2xl text-center">
-            <h2 className="text-2xl font-bold">
-              Pesanan Berhasil 🍜
-            </h2>
+          <div className="bg-white p-6 rounded-xl">
+            <p>Yakin checkout?</p>
+
+            <button onClick={() => setShowConfirm(false)}>
+              Tidak
+            </button>
+
+            <button onClick={confirmYes}>
+              Ya
+            </button>
           </div>
         </div>
       )}
@@ -272,41 +254,53 @@ export default function Home() {
       {/* RECEIPT */}
       {receipt && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-6 z-50">
-          <div className="bg-white w-full max-w-sm rounded-2xl p-6">
-            <h2 className="text-2xl font-bold text-center mb-2">
-              🧾 Struk Pesanan
+          <div id="receipt" className="bg-white w-full max-w-sm p-6 rounded-xl">
+
+            <h2 className="text-center font-bold text-xl mb-2">
+              🧾 Struk
             </h2>
 
-            <p className="text-center text-gray-500 text-sm mb-4">
+            <p className="text-center text-sm mb-3">
               {receipt.time}
             </p>
 
-            <div className="border-t border-b py-3 mb-4">
+            <div className="border-t border-b py-2">
               {receipt.items.map((item: any) => (
-                <div
-                  key={item.id}
-                  className="flex justify-between text-sm mb-2"
-                >
-                  <span>
-                    {item.name} x{item.qty}
-                  </span>
-                  <span>
-                    Rp {(item.price * item.qty).toLocaleString()}
-                  </span>
+                <div key={item.id} className="flex justify-between text-sm">
+                  <span>{item.name} x{item.qty}</span>
+                  <span>Rp {(item.price * item.qty).toLocaleString()}</span>
                 </div>
               ))}
             </div>
 
-            <div className="flex justify-between font-bold text-lg mb-4">
+            <div className="flex justify-between font-bold mt-3">
               <span>Total</span>
               <span>Rp {receipt.total.toLocaleString()}</span>
             </div>
 
             <button
-              onClick={() => setReceipt(null)}
-              className="w-full bg-black text-white py-3 rounded-xl font-bold"
+              onClick={async () => {
+                const el = document.getElementById("receipt");
+                if (!el) return;
+
+                const canvas = await html2canvas(el);
+                const img = canvas.toDataURL("image/png");
+
+                const link = document.createElement("a");
+                link.href = img;
+                link.download = `struk-${Date.now()}.png`;
+                link.click();
+              }}
+              className="w-full mt-3 bg-gray-200 py-2 rounded-xl"
             >
-              Tutup Struk
+              Download Struk
+            </button>
+
+            <button
+              onClick={() => setReceipt(null)}
+              className="w-full mt-2 bg-black text-white py-2 rounded-xl"
+            >
+              Tutup
             </button>
           </div>
         </div>
@@ -314,47 +308,28 @@ export default function Home() {
 
       {/* HISTORY */}
       {showHistory && (
-        <div
-          className="fixed inset-0 bg-black/60 flex items-center justify-center p-6 z-50"
-          onClick={() => setShowHistory(false)}
-        >
-          <div
-            className="bg-white w-full max-w-sm rounded-2xl p-6 max-h-[80vh] overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h2 className="text-2xl font-bold mb-4 text-center">
-              📦 Order History
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-6 z-50">
+          <div className="bg-white w-full max-w-sm p-6 rounded-xl max-h-[80vh] overflow-y-auto">
+
+            <h2 className="text-xl font-bold mb-4">
+              📦 History
             </h2>
 
             {orders.length === 0 ? (
-              <p className="text-center text-gray-500">
-                Belum ada pesanan
-              </p>
+              <p>Belum ada order</p>
             ) : (
               orders.map((order) => (
-                <div
-                  key={order.id}
-                  className="border-b py-3 mb-3"
-                >
-                  <p className="text-sm text-gray-500">
-                    {order.time}
-                  </p>
+                <div key={order.id} className="border-b py-2">
+                  <p className="text-sm">{order.time}</p>
 
                   {order.items.map((item: any) => (
-                    <div
-                      key={item.id}
-                      className="flex justify-between text-sm"
-                    >
-                      <span>
-                        {item.name} x{item.qty}
-                      </span>
-                      <span>
-                        Rp {(item.price * item.qty).toLocaleString()}
-                      </span>
+                    <div key={item.id} className="flex justify-between text-sm">
+                      <span>{item.name} x{item.qty}</span>
+                      <span>Rp {(item.price * item.qty).toLocaleString()}</span>
                     </div>
                   ))}
 
-                  <p className="font-bold mt-2">
+                  <p className="font-bold">
                     Total: Rp {order.total.toLocaleString()}
                   </p>
                 </div>
@@ -363,7 +338,7 @@ export default function Home() {
 
             <button
               onClick={() => setShowHistory(false)}
-              className="w-full mt-4 bg-black text-white py-3 rounded-xl font-bold"
+              className="w-full mt-4 bg-black text-white py-2 rounded-xl"
             >
               Tutup
             </button>
@@ -371,7 +346,7 @@ export default function Home() {
         </div>
       )}
 
-      {/* ANIMATION */}
+      {/* ANIMASI */}
       <style jsx>{`
         @keyframes slideUp {
           from {
@@ -388,6 +363,7 @@ export default function Home() {
           animation: slideUp 0.25s ease-out;
         }
       `}</style>
+
     </main>
   );
 }
